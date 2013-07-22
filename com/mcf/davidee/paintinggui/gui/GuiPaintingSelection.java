@@ -70,7 +70,7 @@ public class GuiPaintingSelection extends GuiScreen
 				}
 			}
 		}
-
+		
 		EnumArt[] validArtsArray = validArts.toArray(new EnumArt[0]);
 
 		final int START_X = 10;
