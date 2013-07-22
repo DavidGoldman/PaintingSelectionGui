@@ -1,18 +1,24 @@
 package com.mcf.davidee.paintinggui.gui;
 
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.EnumArt;
-import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
 public class GuiPaintingButton extends GuiButton {
 	
-	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/painting/paintings_kristoffer_zetterstrand.png");
+	// removed final modifier so Paintings++ can change the shown texture.
+	// changed Texture from resourcelocation to DynamicTexture for Paintings++ compatibility.
+	private static DynamicTexture TEXTURE;
+	//old (for backup if ever needed )new ResourceLocation("textures/painting/paintings_kristoffer_zetterstrand.png");
     
 	protected EnumArt art;
     private static final int EXT = 3;
@@ -26,6 +32,12 @@ public class GuiPaintingButton extends GuiButton {
         super(id, x, y, art.sizeX, art.sizeY, art.title);
         this.art = art;
         this.maxY=maxY;
+        try {
+			TEXTURE = new DynamicTexture(ImageIO.read(getClass().getResourceAsStream("assets/minecraft/textures/painting/paintings_kristoffer_zetterstrand.png")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     public void shiftY(int dy) {
@@ -52,7 +64,7 @@ public class GuiPaintingButton extends GuiButton {
     public void drawButton(Minecraft mc, int i, int j) {
         if (drawButton && shouldDraw()) {
             FontRenderer fontrenderer = mc.fontRenderer;
-            mc.renderEngine.func_110577_a(TEXTURE);
+            TEXTURE.func_110564_a(); //mc.renderEngine.func_110577_a(TEXTURE);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             boolean flag = i >= xPosition && j >= yPosition && i < xPosition + width && j < yPosition + height;
             drawTexturedModalRect(xPosition, yPosition, art.offsetX, art.offsetY, width, height);
