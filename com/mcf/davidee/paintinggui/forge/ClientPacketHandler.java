@@ -14,7 +14,7 @@ import net.minecraft.util.EnumArt;
 import net.minecraft.util.MovingObjectPosition;
 
 import com.mcf.davidee.paintinggui.PaintingSelectionMod;
-import com.mcf.davidee.paintinggui.gui.GuiPaintingSelection;
+import com.mcf.davidee.paintinggui.gui.PaintingSelectionScreen;
 
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -52,7 +52,7 @@ public class ClientPacketHandler implements IPacketHandler{
 				else { //Show art GUI
 					Minecraft mc = Minecraft.getMinecraft();
 					if (mc.currentScreen == null)
-						mc.displayGuiScreen(new GuiPaintingSelection(art, id));
+						mc.displayGuiScreen(new PaintingSelectionScreen(art, id));
 				}
 			}
 		}

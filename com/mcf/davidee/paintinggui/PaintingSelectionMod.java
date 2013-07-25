@@ -21,7 +21,7 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkMod.SidedPacketHandler;
 
 
-@Mod(modid = "PaintingSelGui", name = "PaintingSelectionGui", version = "1.6.2.1")
+@Mod(modid = "PaintingSelGui", name = "PaintingSelectionGui", version = "1.6.2.2", dependencies = "after:guilib")
 @NetworkMod(
 		clientSideRequired = true,
 		serverSideRequired = false,
