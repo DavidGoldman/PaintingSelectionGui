@@ -2,6 +2,8 @@ package com.mcf.davidee.paintinggui.gui;
 
 import java.util.ArrayList;
 
+import org.lwjgl.input.Keyboard;
+
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.EnumArt;
 
@@ -45,10 +47,17 @@ public class PaintingSelectionScreen extends BasicScreen implements ButtonHandle
 		drawRect(paintingContainer.left(), paintingContainer.top(), paintingContainer.right()-10, paintingContainer.bottom(), 0x44444444);
 	}
 	
+	
+	@Override
+	protected void unhandledKeyTyped(char c, int code) {
+		if (code == Keyboard.KEY_ESCAPE)
+			close();
+	}
+
 	public void updateScreen() {
 		super.updateScreen();
 		if (mc.thePlayer == null || !mc.thePlayer.isEntityAlive())
-			mc.displayGuiScreen(null);
+			close();
 	}
 
 	@Override
