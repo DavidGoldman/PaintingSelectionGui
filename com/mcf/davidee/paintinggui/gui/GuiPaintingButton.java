@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL11;
 
 public class GuiPaintingButton extends GuiButton {
 	
-	private static ResourceLocation TEXTURE = new ResourceLocation("textures/painting/paintings_kristoffer_zetterstrand.png");
+	public static ResourceLocation TEXTURE = new ResourceLocation("textures/painting/paintings_kristoffer_zetterstrand.png");
     
 	protected EnumArt art;
     private static final int EXT = 3;
