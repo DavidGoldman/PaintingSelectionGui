@@ -29,7 +29,7 @@ public class PaintingButton extends Button implements Shiftable {
 
 	@Override
 	public void draw(int mx, int my) {
-		mc.renderEngine.func_110577_a(TEXTURE);
+		mc.renderEngine.bindTexture(TEXTURE);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		drawTexturedModalRect(x, y, art.offsetX, art.offsetY, width, height);
 		
