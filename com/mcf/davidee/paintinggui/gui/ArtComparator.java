@@ -2,7 +2,7 @@ package com.mcf.davidee.paintinggui.gui;
 
 import java.util.Comparator;
 
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 
 public class ArtComparator implements Comparator<EnumArt> {
 	
@@ -15,4 +15,3 @@ public class ArtComparator implements Comparator<EnumArt> {
 		return b.sizeX - a.sizeX;
 	}
 }
-
