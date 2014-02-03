@@ -1,8 +1,9 @@
 package com.mcf.davidee.paintinggui.gui;
 
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.audio.PositionedSoundRecord;
 
 import org.lwjgl.opengl.GL11;
 
@@ -29,7 +30,7 @@ public class PaintingButton extends Button implements Shiftable {
 
 	@Override
 	public void draw(int mx, int my) {
-		mc.renderEngine.bindTexture(TEXTURE);
+		mc.getTextureManager().bindTexture(TEXTURE);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		drawTexturedModalRect(x, y, art.offsetX, art.offsetY, width, height);
 		
@@ -42,7 +43,8 @@ public class PaintingButton extends Button implements Shiftable {
 	}
 	
 	public void handleClick(int mx, int my) {
-		mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+        //getSoundHandler.playSound; unknown
+		mc.func_147118_V().func_147682_a(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 		super.handleClick(mx, my);
 	}
 	
