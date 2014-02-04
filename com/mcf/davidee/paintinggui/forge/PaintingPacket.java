@@ -45,7 +45,7 @@ public class PaintingPacket implements IPacket {
     }
     
     public void encodeInto(ChannelHandlerContext ctx, ByteBuf buffer) {
-        System.out.println("[Painting GUI] PaintingPacket.writeBytes");
+        ByteBufOutputStream dos = new ByteBufOutputStream(buffer);
         try {
             dos.writeInt(id);
             dos.writeInt(art.length);
