@@ -1,62 +1,64 @@
 package com.mcf.davidee.paintinggui.forge;
 
-import static com.mcf.davidee.paintinggui.PaintingSelectionMod.setPaintingArt;
+import java.util.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
+import net.minecraft.util.ChatComponentText;
 
 import com.mcf.davidee.paintinggui.PaintingSelectionMod;
+import com.mcf.davidee.paintinggui.forge.PaintingPacket;
 
-import cpw.mods.fml.common.network.IPacketHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
-public class ServerPacketHandler implements IPacketHandler{
+public class ServerPacketHandler {
 
-	@Override
-	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
-		if (player instanceof EntityPlayerMP)
-			serverPayload((EntityPlayerMP)player,packet.data);
+	public static final char COLOR = '\u00A7';
+    
+    protected EnumArt getEnumArt(String artName) {
+		for (EnumArt art : EnumArt.values())
+			if (art.title.equals(artName))
+				return art;
+		return EnumArt.Kebab;
 	}
 
-	private void serverPayload(EntityPlayerMP player, byte[] data){
-		try {
-			DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
-			int id = dis.readInt();
-			if (dis.readInt() == 1)
-				setPainting(id, dis.readUTF(), player);
-			else 
-				sendPossiblePaintings(id, player);
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
+	protected void setPaintingArt(EntityPainting p, EnumArt art) {
+		p.art = art;
+		p.setDirection(p.hangingDirection);
 	}
 
-	private void setPainting(int id, String art, EntityPlayerMP player) {
-		Entity e = player.getServerForPlayer().getEntityByID(id);
-		if (e instanceof EntityPainting) {
-			EntityPainting painting = (EntityPainting)e;
-			setPaintingArt(painting, PaintingSelectionMod.getEnumArt(art));
-			PacketDispatcher.sendPacketToAllInDimension(PaintingSelectionMod.createPacket(id, new String[] {art}), painting.dimension);
-		}
-		else
-			player.addChatMessage(PaintingSelectionMod.COLOR + "cError - Could not locate painting");
-	}
-
-	private void sendPossiblePaintings(int id, EntityPlayerMP player) {
-		Entity e = player.getServerForPlayer().getEntityByID(id);
+    public void initialize() {
+        PaintingSelectionMod.dispatcher.registerPacket(PaintingPacket.class);
+    }
+    
+    public void onServerPacket(EntityPlayerMP player, PaintingPacket packet) {
+        if (packet.art.length == 1) {
+            setPainting(packet.id, packet.art[0], player);
+        } else {
+            sendPossiblePaintings(packet.id, player);
+        }
+    }
+    
+    public void onClientPacket(EntityPlayer player, PaintingPacket packet) {
+    }
+    
+    private void setPainting(int id, String art, EntityPlayerMP player) {
+        Entity e = player.worldObj.getEntityByID(id);
+        if (e instanceof EntityPainting) {
+            EntityPainting painting = (EntityPainting)e;
+            setPaintingArt(painting, getEnumArt(art));
+            PaintingSelectionMod.dispatcher.sendToDimension(new PaintingPacket(id, new String[] {art}), e.dimension);
+        }
+        else
+            //addChatMessage
+            player.func_145747_a(new ChatComponentText(COLOR + "cError - Could not locate painting"));
+    }
+    
+    private void sendPossiblePaintings(int id, EntityPlayerMP player) {
+        Entity e = player.worldObj.getEntityByID(id);
 		if (e instanceof EntityPainting) {
 			EntityPainting painting = (EntityPainting)e;
 			EnumArt origArt = painting.art;
@@ -70,16 +72,18 @@ public class ServerPacketHandler implements IPacketHandler{
 			EnumArt[] validArtsArray = validArts.toArray(new EnumArt[0]);
 			Arrays.sort(validArtsArray, PaintingSelectionMod.ART_COMPARATOR);
 
-			String[] names = new String[validArtsArray.length];
-			for (int i =0; i < validArtsArray.length; ++i)
-				names[i] = validArtsArray[i].title;
-			player.playerNetServerHandler.sendPacketToPlayer(PaintingSelectionMod.createPacket(id, names));
-
-			//Reset the art
+            if (validArtsArray.length > 0) {
+                String[] names = new String[validArtsArray.length];
+                for (int i =0; i < validArtsArray.length; ++i)
+                    names[i] = validArtsArray[i].title;
+                PaintingSelectionMod.dispatcher.sendTo(new PaintingPacket(id, names), player);
+            }
+            
+            //Reset the art
 			setPaintingArt(painting, origArt);
 		}
-		else
-			player.addChatMessage(PaintingSelectionMod.COLOR + "cError - Could not locate painting");
-	}
-
+        else
+            //addChatMessage
+            player.func_145747_a(new ChatComponentText(COLOR + "cError - Could not locate painting"));
+    }
 }

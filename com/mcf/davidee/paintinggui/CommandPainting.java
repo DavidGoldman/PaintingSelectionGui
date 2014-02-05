@@ -1,11 +1,26 @@
 package com.mcf.davidee.paintinggui;
 
-import net.minecraft.command.CommandBase;
+import java.util.List;
+import java.util.ArrayList;
+
+import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-public class CommandPainting extends CommandBase {
+import com.mcf.davidee.paintinggui.PaintingSelectionMod;
+import com.mcf.davidee.paintinggui.forge.PaintingPacket;
+
+
+public class CommandPainting implements ICommand {
+
+    private List aliases;
+    
+    public CommandPainting() {
+        this.aliases = new ArrayList();
+        this.aliases.add("painting");
+        this.aliases.add("paint");
+    }
 
 	@Override
 	public String getCommandName() {
@@ -16,16 +31,41 @@ public class CommandPainting extends CommandBase {
 	public String getCommandUsage(ICommandSender icommandsender) {
 		return "/painting";
 	}
+    
+    @Override
+    public List getCommandAliases()
+    {
+        return this.aliases;
+    }
 
 	@Override
 	public void processCommand(ICommandSender icommandsender, String[] astring) {
-		EntityPlayerMP player = (EntityPlayerMP)icommandsender;
-		player.playerNetServerHandler.sendPacketToPlayer(PaintingSelectionMod.createPacket(-1, new String[0]));
+        if (icommandsender instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP)icommandsender;
+            PaintingSelectionMod.dispatcher.sendTo(new PaintingPacket(-1, new String[0]), player);
+        }
 	}
 	
 	@Override
 	public boolean canCommandSenderUseCommand(ICommandSender s){
 		return s instanceof EntityPlayer;
 	}
+    
+    @Override
+    public List addTabCompletionOptions(ICommandSender icommandsender, String[] astring)
+    {
+        return null;
+    }
 
+    @Override
+    public boolean isUsernameIndex(String[] astring, int i)
+    {
+        return false;
+    }
+
+    @Override
+    public int compareTo(Object o)
+    {
+        return 0;
+    }
 }

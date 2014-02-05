@@ -1,65 +1,52 @@
 package com.mcf.davidee.paintinggui.forge;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ChatComponentText;
 
 import com.mcf.davidee.paintinggui.PaintingSelectionMod;
+import com.mcf.davidee.paintinggui.forge.ServerPacketHandler;
+import com.mcf.davidee.paintinggui.forge.PaintingPacket;
 import com.mcf.davidee.paintinggui.gui.PaintingSelectionScreen;
 
-import cpw.mods.fml.common.network.IPacketHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
-public class ClientPacketHandler implements IPacketHandler{
+public class ClientPacketHandler extends ServerPacketHandler {
 
-	@Override
-	public void onPacketData(INetworkManager manager,Packet250CustomPayload packet, Player player) {
-		clientPayload(packet.data, (EntityPlayer)player);
-	}
-
-	private void clientPayload(byte[] data, EntityPlayer player){
-		try{
-			DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
-			int id = dis.readInt();
-			String[] art = new String[dis.readInt()];
-			for (int i = 0; i < art.length; ++i)
-				art[i] = dis.readUTF();
-			
-			if (id == -1) { //What painting is selected?
-				MovingObjectPosition pos = Minecraft.getMinecraft().objectMouseOver;
-				if (pos != null && pos.entityHit instanceof EntityPainting) 
-					PacketDispatcher.sendPacketToServer(PaintingSelectionMod.createPacket(pos.entityHit.entityId, new String[0]));
-				else
-					player.addChatMessage(PaintingSelectionMod.COLOR + "cError - No painting selected");
-			}
-			else {
-				if (art.length == 1) { //Set Painting
-					EnumArt enumArt = PaintingSelectionMod.getEnumArt(art[0]);
-					Entity e = player.worldObj.getEntityByID(id);
-					if (e instanceof EntityPainting)
-						PaintingSelectionMod.setPaintingArt((EntityPainting)e, enumArt);
-				}
-				else { //Show art GUI
-					Minecraft mc = Minecraft.getMinecraft();
-					if (mc.currentScreen == null)
-						mc.displayGuiScreen(new PaintingSelectionScreen(art, id));
-				}
-			}
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
-	}
-	
-
+    private void addChatMessage(ChatComponentText msg) {
+        //getChatGUI.unknown
+        Minecraft.getMinecraft().ingameGUI.func_146158_b().func_146227_a(msg);
+    }
+    
+    @Override
+    public void onClientPacket(EntityPlayer player, PaintingPacket packet) {
+        if (packet.id == -1) {
+            MovingObjectPosition pos = Minecraft.getMinecraft().objectMouseOver;
+            if (pos != null && pos.entityHit instanceof EntityPainting) {
+                EntityPainting e = (EntityPainting)(pos.entityHit);
+                PaintingSelectionMod.dispatcher.sendToServer(new PaintingPacket(e.func_145782_y() /*getEntityId*/, new String[0]));
+            }
+            else
+                addChatMessage(new ChatComponentText(COLOR + "cError - No painting selected"));
+        } 
+        else {
+            if (packet.art.length == 1) {
+                EnumArt enumArt = getEnumArt(packet.art[0]);
+                Entity e = player.worldObj.getEntityByID(packet.id);
+                if (e instanceof EntityPainting)
+                    setPaintingArt((EntityPainting)e, enumArt);
+            }
+            else { //Show art GUI
+                Minecraft mc = Minecraft.getMinecraft();
+                if (mc.currentScreen == null)
+                    //displayGuiScreen
+                    mc.func_147108_a(new PaintingSelectionScreen(packet.art, packet.id));
+            }
+        }
+    }
 }

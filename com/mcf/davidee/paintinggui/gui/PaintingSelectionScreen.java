@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import org.lwjgl.input.Keyboard;
 
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.EnumArt;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 
 import com.mcf.davidee.guilib.basic.BasicScreen;
 import com.mcf.davidee.guilib.basic.BasicScreen.CloseHandler;
@@ -16,9 +16,10 @@ import com.mcf.davidee.guilib.core.Container;
 import com.mcf.davidee.guilib.core.Scrollbar;
 import com.mcf.davidee.guilib.vanilla.ButtonVanilla;
 import com.mcf.davidee.guilib.vanilla.ScrollbarVanilla;
-import com.mcf.davidee.paintinggui.PaintingSelectionMod;
 
-import cpw.mods.fml.common.network.PacketDispatcher;
+import com.mcf.davidee.paintinggui.PaintingSelectionMod;
+import com.mcf.davidee.paintinggui.forge.PaintingPacket;
+
 
 public class PaintingSelectionScreen extends BasicScreen implements ButtonHandler {
 	
@@ -56,12 +57,16 @@ public class PaintingSelectionScreen extends BasicScreen implements ButtonHandle
 
 	public void updateScreen() {
 		super.updateScreen();
+        Minecraft mc = Minecraft.getMinecraft();
 		if (mc.thePlayer == null || !mc.thePlayer.isEntityAlive())
 			close();
 	}
 
 	@Override
 	protected void revalidateGui() {
+        int width = this.field_146294_l;
+        int height = this.field_146295_m;
+    
 		final int START_X = 10, START_Y = 30;
 		final int END_X = width - 10;
 		final int GAP = 5;
@@ -96,6 +101,8 @@ public class PaintingSelectionScreen extends BasicScreen implements ButtonHandle
 	}
 	
 	private void centerRow(int start, int end) {
+        int width = this.field_146294_l;
+    
 		int left = buttons[start].getX();
 		int right = buttons[end].getX() + buttons[end].getWidth();
 
@@ -138,10 +145,9 @@ public class PaintingSelectionScreen extends BasicScreen implements ButtonHandle
 	@Override
 	public void buttonClicked(Button button) {
 		String artTitle = ((PaintingButton)button).art.title;
-		Packet250CustomPayload packet = PaintingSelectionMod.createPacket(paintingID, new String[] {artTitle});
-		if (packet != null)
-			PacketDispatcher.sendPacketToServer(packet);
-		mc.displayGuiScreen(null);
+        PaintingSelectionMod.dispatcher.sendToServer(new PaintingPacket(paintingID, new String[] {artTitle}));
+		Minecraft mc = Minecraft.getMinecraft();
+        //displayGuiScreen
+        mc.func_147108_a(null);
 	}
-
 }
