@@ -2,13 +2,11 @@ package com.mcf.davidee.paintinggui.gui;
 
 import java.util.ArrayList;
 
+import net.minecraft.entity.item.EntityPainting.EnumArt;
+
 import org.lwjgl.input.Keyboard;
 
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.EnumArt;
-
 import com.mcf.davidee.guilib.basic.BasicScreen;
-import com.mcf.davidee.guilib.basic.BasicScreen.CloseHandler;
 import com.mcf.davidee.guilib.basic.Label;
 import com.mcf.davidee.guilib.core.Button;
 import com.mcf.davidee.guilib.core.Button.ButtonHandler;
@@ -17,8 +15,7 @@ import com.mcf.davidee.guilib.core.Scrollbar;
 import com.mcf.davidee.guilib.vanilla.ButtonVanilla;
 import com.mcf.davidee.guilib.vanilla.ScrollbarVanilla;
 import com.mcf.davidee.paintinggui.PaintingSelectionMod;
-
-import cpw.mods.fml.common.network.PacketDispatcher;
+import com.mcf.davidee.paintinggui.forge.PaintingPacket;
 
 public class PaintingSelectionScreen extends BasicScreen implements ButtonHandler {
 	
@@ -136,11 +133,9 @@ public class PaintingSelectionScreen extends BasicScreen implements ButtonHandle
 	}
 	
 	@Override
-	public void buttonClicked(Button button) {
+	public void buttonClicked(Button button) { 
 		String artTitle = ((PaintingButton)button).art.title;
-		Packet250CustomPayload packet = PaintingSelectionMod.createPacket(paintingID, new String[] {artTitle});
-		if (packet != null)
-			PacketDispatcher.sendPacketToServer(packet);
+		PaintingSelectionMod.DISPATCHER.sendToServer(new PaintingPacket(paintingID, new String[] { artTitle } ));
 		mc.displayGuiScreen(null);
 	}
 

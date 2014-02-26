@@ -1,13 +1,13 @@
 package com.mcf.davidee.paintinggui.gui;
 
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 
 import com.mcf.davidee.guilib.core.Button;
-import com.mcf.davidee.guilib.core.Button.ButtonHandler;
 import com.mcf.davidee.guilib.core.Scrollbar.Shiftable;
 
 public class PaintingButton extends Button implements Shiftable {
@@ -42,7 +42,7 @@ public class PaintingButton extends Button implements Shiftable {
 	}
 	
 	public void handleClick(int mx, int my) {
-		mc.sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+		mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
 		super.handleClick(mx, my);
 	}
 	
