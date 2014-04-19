@@ -6,15 +6,14 @@ import java.util.List;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import com.mcf.davidee.paintinggui.PaintingSelectionMod;
 
-import cpw.mods.fml.common.network.PacketDispatcher;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
 public class GuiPaintingSelection extends GuiScreen
 {
@@ -43,9 +42,9 @@ public class GuiPaintingSelection extends GuiScreen
 			mc.displayGuiScreen(null);
 		else if (guibutton instanceof GuiPaintingButton) {
 			String s = ((GuiPaintingButton)guibutton).art.title;
-			Packet250CustomPayload packet = PaintingSelectionMod.createPacket(id, new String[] {s});
+			FMLProxyPacket packet = PaintingSelectionMod.createPacket(id, new String[] {s});
 			if (packet != null)
-				PacketDispatcher.sendPacketToServer(packet);
+				PaintingSelectionMod.Channel.sendToServer(packet);
 			mc.displayGuiScreen(null);
 		}
 
@@ -158,7 +157,7 @@ public class GuiPaintingSelection extends GuiScreen
 	}
 	public void drawScreen(int par1, int par2, float par3) {
 		drawDefaultBackground();
-		drawCenteredString(fontRenderer, screenTitle, width / 2, 10, 0xffffff);
+		drawCenteredString(fontRendererObj, screenTitle, width / 2, 10, 0xffffff);
 		super.drawScreen(par1, par2, par3);
 	}
 

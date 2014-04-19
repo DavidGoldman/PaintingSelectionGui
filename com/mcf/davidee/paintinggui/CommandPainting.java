@@ -20,7 +20,7 @@ public class CommandPainting extends CommandBase {
 	@Override
 	public void processCommand(ICommandSender icommandsender, String[] astring) {
 		EntityPlayerMP player = (EntityPlayerMP)icommandsender;
-		player.playerNetServerHandler.sendPacketToPlayer(PaintingSelectionMod.createPacket(-1, new String[0]));
+		PaintingSelectionMod.Channel.sendTo(PaintingSelectionMod.createPacket(-1, new String[0]), player);
 	}
 	
 	@Override

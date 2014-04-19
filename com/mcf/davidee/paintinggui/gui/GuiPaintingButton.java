@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.EnumArt;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
@@ -50,9 +50,9 @@ public class GuiPaintingButton extends GuiButton {
     
     @Override
     public void drawButton(Minecraft mc, int i, int j) {
-        if (drawButton && shouldDraw()) {
+        if (visible && shouldDraw()) {
             FontRenderer fontrenderer = mc.fontRenderer;
-            mc.renderEngine.func_110577_a(TEXTURE);
+            mc.renderEngine.bindTexture(TEXTURE);
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             boolean flag = i >= xPosition && j >= yPosition && i < xPosition + width && j < yPosition + height;
             drawTexturedModalRect(xPosition, yPosition, art.offsetX, art.offsetY, width, height);

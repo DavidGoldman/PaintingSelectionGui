@@ -1,9 +1,9 @@
 package com.mcf.davidee.paintinggui.forge;
 
 import static com.mcf.davidee.paintinggui.PaintingSelectionMod.setPaintingArt;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,33 +11,38 @@ import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.EnumArt;
+import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.world.World;
 
 import com.mcf.davidee.paintinggui.PaintingSelectionMod;
 
-import cpw.mods.fml.common.network.IPacketHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 
-public class ServerPacketHandler implements IPacketHandler{
+public class ServerPacketHandler {
 
-	@Override
-	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
-		if (player instanceof EntityPlayerMP)
-			serverPayload((EntityPlayerMP)player,packet.data);
-	}
+	
+	@SubscribeEvent
+	public void onServerPacket(ServerCustomPacketEvent event) {
 
-	private void serverPayload(EntityPlayerMP player, byte[] data){
+		EntityPlayerMP player = ((NetHandlerPlayServer) event.handler).playerEntity;
+		ByteBufInputStream dis = new ByteBufInputStream(event.packet.payload());
+		ByteBuf buf = event.packet.payload();
+
+		World world = player.worldObj;
+		System.out.println("Server packet");
+
 		try {
-			DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
 			int id = dis.readInt();
 			if (dis.readInt() == 1)
 				setPainting(id, dis.readUTF(), player);
 			else 
 				sendPossiblePaintings(id, player);
+			
+			dis.close();
 		}
 		catch(IOException e){
 			e.printStackTrace();
@@ -49,10 +54,10 @@ public class ServerPacketHandler implements IPacketHandler{
 		if (e instanceof EntityPainting) {
 			EntityPainting painting = (EntityPainting)e;
 			setPaintingArt(painting, PaintingSelectionMod.getEnumArt(art));
-			PacketDispatcher.sendPacketToAllInDimension(PaintingSelectionMod.createPacket(id, new String[] {art}), painting.dimension);
+			PaintingSelectionMod.Channel.sendToAll(PaintingSelectionMod.createPacket(id, new String[] {art})/*,painting.dimension*/);
 		}
 		else
-			player.addChatMessage(PaintingSelectionMod.COLOR + "cError - Could not locate painting");
+			player.addChatMessage(new ChatComponentText( PaintingSelectionMod.COLOR + "cError - Could not locate painting"));
 	}
 
 	private void sendPossiblePaintings(int id, EntityPlayerMP player) {
@@ -73,13 +78,15 @@ public class ServerPacketHandler implements IPacketHandler{
 			String[] names = new String[validArtsArray.length];
 			for (int i =0; i < validArtsArray.length; ++i)
 				names[i] = validArtsArray[i].title;
-			player.playerNetServerHandler.sendPacketToPlayer(PaintingSelectionMod.createPacket(id, names));
+			
+			PaintingSelectionMod.Channel.sendTo(PaintingSelectionMod.createPacket(id, names), player);
+//			player.playerNetServerHandler.sendPacketToPlayer(PaintingSelectionMod.createPacket(id, names));
 
 			//Reset the art
 			setPaintingArt(painting, origArt);
 		}
 		else
-			player.addChatMessage(PaintingSelectionMod.COLOR + "cError - Could not locate painting");
+			player.addChatMessage(new ChatComponentText( PaintingSelectionMod.COLOR + "cError - Could not locate painting"));
 	}
 
 }
